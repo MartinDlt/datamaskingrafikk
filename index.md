@@ -30,6 +30,9 @@
         <li>
             <a href="del1/TegnRektangel.html">TegnRektangel</a>
         </li>
+        <li>
+            <a href="del1/oppg2a.html">Oppgave 2A</a>        
+        </li>
     </ul>
 </body>
 </html>
