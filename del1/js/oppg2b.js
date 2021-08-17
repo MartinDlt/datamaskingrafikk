@@ -21,8 +21,11 @@ function main(){
 
     let gl = canvas.getContext('webgl');
     if(!gl){
-        console.log("Klarte ikke å hente ut webgl konteksten");
-        return;
+        gl = canvas.getContext('experimental-webgl');
+        if(!gl){
+            console.log("Klarte ikke å hente ut webgl konteksten");
+            return;
+        }
     }
 
     gl.enable(gl.BLEND);
