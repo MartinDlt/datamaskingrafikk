@@ -4,17 +4,20 @@
 // NB! Legg merke til bruk av spesialenkeltapostrof (alt+�)
 let VSHADER_SOURCE = `
 	attribute vec4 a_Position;
+	attribute vec4 a_Color;
+	varying vec4 v_Color;  
 	void main() {
 	  gl_Position = a_Position;
+	  v_Color = a_Color;
 	}`;
 
 // Fragment shader program
 // Bruker prefiks u_ for � indikere uniform
 let FSHADER_SOURCE = ` 
    precision mediump float;
-   uniform vec4 u_FragColor;     
+   varying vec4 v_Color;      
    void main() {
-     gl_FragColor = u_FragColor;
+     gl_FragColor = v_Color;
    }`;
 
 function main() {
@@ -34,23 +37,14 @@ function main() {
 
     //Initialiserer verteksbuffer:
     let noVertexes = initVertexBuffers(gl);
-
-    //Kopler til fargeattributt:
-    let u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
-    if (u_FragColor < 0) {
-        console.log('Fant ikke uniform-parametret u_FragColor i shaderen!?');
-        return;
-    }
-    let rgba = [0.9, 0.1, 0.6, 1.0];
-    //Sender inn fargeverdi:
-    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
     //Rensker skjermen:
-    gl.clearColor(0.0, 7.0, 0.4, 1.0);
+    gl.clearColor(0.0, 1.0, 0.4, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Tegner trekanter:
-    gl.drawArrays(gl.TRIANGLES, 0, noVertexes);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLES, 3, 3);
+    gl.drawArrays(gl.TRIANGLES, 3 * 2, 3);
 }
 
 function initVertexBuffers(gl) {
@@ -61,10 +55,51 @@ function initVertexBuffers(gl) {
         0.5, -0.5, 0,
         -0.3, 0.6, 0,
         -0.1, -0.9, 0,
-        0.5, -0.8, 0
+        0.5, -0.8, 0,
+        -0.9, 0.7, 0,
+        -0.4, -0.7, 0,
+        -0.6, 0.85, 0
+    ]);
+
+    let colors = new Float32Array([
+        0.19, 0.22, 0.27, 1.0,
+        0.19, 0.22, 0.27, 1.0,
+        1.00, 1.00, 1.00, 1.0,
+        0.50, 0.70, 0.00, 1.0,
+        0.70, 0.50, 0.00, 1.0,
+        0.60, 0.60, 0.20, 1.0,
+        1.00, 0.00, 0.00, 1.0,
+        0.00, 1.00, 0.00, 1.0,
+        0.00, 0.00, 1.00, 1.0
     ]);
 
     let noVertexes = vertices.length / 3; // Antall vertekser, hver verteks best�r av 3 floats.
+    let noColors = colors.length / 4;
+
+    let colorBuffer = gl.createBuffer();
+    if(!colorBuffer){
+        console.log("Fikk ikke laget et bufferobject!!");
+        return -1;
+    }
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+
+    let colAttrib = gl.getAttribLocation(gl.program, 'a_Color');
+    if(!colAttrib){
+        console.log("Fant ikke attributten a_Color");
+        return -1;
+    }
+
+    let floatsPerColor = 4;
+    gl.vertexAttribPointer(colAttrib, floatsPerColor, gl.FLOAT, false, 0, 0);
+
+    // Enabler verteksshaderattributtpekeren:
+    gl.enableVertexAttribArray(colAttrib);
+
+    // // Kopler fra bufferobjektet:
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     // Oppretter et bufferobjekt:
     let positionBuffer = gl.createBuffer();
