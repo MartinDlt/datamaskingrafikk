@@ -1,3 +1,6 @@
+let TRIANGLE = 3;
+let LINE = 2;
+let POINT = 1;
 
 let VSHADER_SOURCE = `
     attribute vec4 a_Position;
@@ -21,13 +24,11 @@ function main(){
 
     let gl = canvas.getContext('webgl');
     if(!gl){
-        gl = canvas.getContext('experimental-webgl');
-        if(!gl){
-            console.log("Klarte ikke å hente ut webgl konteksten");
-            return;
-        }
+        console.log("Klarte ikke å hente ut webgl konteksten");
+        return;
     }
 
+    // Fungerer ikke på mobil (IOS/IPADOS)?
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -46,6 +47,7 @@ function main(){
     }
     let verticesPerLine = 2;
 
+    gl.linewidth = 2.0;
     gl.drawArrays(gl.LINES, 0, numAxes * verticesPerLine);
 
     let numTris = createAxisTriangles(gl);
@@ -78,65 +80,23 @@ function createAxes(gl){
         0.0, 0.7, 0.3, 1.0
     ]);
 
-    let colBuffer = gl.createBuffer();
-    if(!colBuffer){
-        console.log("Klarte ikke å lage en buffer");
-        return -1;
-    }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-
-    let colAttrib = gl.getAttribLocation(gl.program, 'a_Color');
-    if(colAttrib < 0){
-        console.log("Klarte ikke å finne farge attributten: 'a_Color'");
-        return -1;
-    }
-
-    let floatsPerColor = 4;
-    gl.vertexAttribPointer(colAttrib, floatsPerColor, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(colAttrib);
-
-    let vertBuffer = gl.createBuffer();
-    if(!vertBuffer){
-        console.log("Klarte ikke å lage en buffer");
-        return -1;
-    }
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    let vertAttrib = gl.getAttribLocation(gl.program, 'a_Position');
-    if(vertAttrib < 0){
-        console.log("Klarte ikke å finne posisjons attributten: 'a_Position'");
-        return -1;
-    }
-
-    let floatsPerVertex = 3;
-    gl.vertexAttribPointer(vertAttrib, floatsPerVertex, gl.FLOAT, false, 0, 0);
-
-    gl.enableVertexAttribArray(vertAttrib);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    return vertices.length / 2;
+    return addVerticesToBuffer(vertices, colors, gl, LINE);
 }
 
 function createAxisTriangles(gl){
     let vertices = new Float32Array([
-        0.8, 0.025, 0,
-        0.8, -0.025, 0,
-        0.84, 0.0, 0,
-        -0.8, 0.025, 0,
-        -0.8, -0.025, 0,
-        -0.84, 0.0, 0,
-        0.025, 0.8, 0,
-        -0.025, 0.8, 0,
-        0.0, 0.84, 0,
-        0.025, -0.8, 0,
-        -0.025, -0.8, 0,
-        0.0, -0.84, 0
+        0.8, 0.012, 0,
+        0.8, -0.012, 0,
+        0.82, 0.0, 0,
+        -0.8, 0.012, 0,
+        -0.8, -0.012, 0,
+        -0.82, 0.0, 0,
+        0.012, 0.8, 0,
+        -0.012, 0.8, 0,
+        0.0, 0.82, 0,
+        0.012, -0.8, 0,
+        -0.012, -0.8, 0,
+        0.0, -0.82, 0
     ]);
 
     let colors = new Float32Array([
@@ -154,49 +114,7 @@ function createAxisTriangles(gl){
         0.0, 0.7, 0.3, 1.0
     ]);
 
-    let colBuffer = gl.createBuffer();
-    if(!colBuffer){
-        console.log("Klarte ikke å lage en buffer");
-        return -1;
-    }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-
-    let colAttrib = gl.getAttribLocation(gl.program, 'a_Color');
-    if(colAttrib < 0){
-        console.log("Klarte ikke å finne farge attributten: 'a_Color'");
-        return -1;
-    }
-
-    let floatsPerColor = 4;
-    gl.vertexAttribPointer(colAttrib, floatsPerColor, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(colAttrib);
-
-    let vertBuffer = gl.createBuffer();
-    if(!vertBuffer){
-        console.log("Klarte ikke å lage en buffer");
-        return -1;
-    }
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    let vertAttrib = gl.getAttribLocation(gl.program, 'a_Position');
-    if(vertAttrib < 0){
-        console.log("Klarte ikke å finne posisjons attributten: 'a_Position'");
-        return -1;
-    }
-
-    let floatsPerVertex = 3;
-    gl.vertexAttribPointer(vertAttrib, floatsPerVertex, gl.FLOAT, false, 0, 0);
-
-    gl.enableVertexAttribArray(vertAttrib);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    return vertices.length / 3;
+    return addVerticesToBuffer(vertices, colors, gl, TRIANGLE);
 }
 
 function createBigArrow(gl){
@@ -230,6 +148,10 @@ function createBigArrow(gl){
         0.0, 0.59, 0.84, 0.85
     ]);
 
+    return addVerticesToBuffer(vertices, colors, gl, TRIANGLE);
+}
+
+function addVerticesToBuffer(vertices, colors, gl, shape){
     let colBuffer = gl.createBuffer();
     if(!colBuffer){
         console.log("Klarte ikke å lage en buffer");
@@ -272,5 +194,6 @@ function createBigArrow(gl){
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-    return vertices.length / 3;
+    // Divide the total length of the vertices with the amount of vertices in the shape
+    return vertices.length / shape;
 }
