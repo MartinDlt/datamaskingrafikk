@@ -74,7 +74,6 @@ function initVertexBuffers(gl) {
     ]);
 
     let noVertexes = vertices.length / 3; // Antall vertekser, hver verteks best�r av 3 floats.
-    let noColors = colors.length / 4;
 
     let colorBuffer = gl.createBuffer();
     if(!colorBuffer){
@@ -97,9 +96,6 @@ function initVertexBuffers(gl) {
 
     // Enabler verteksshaderattributtpekeren:
     gl.enableVertexAttribArray(colAttrib);
-
-    // // Kopler fra bufferobjektet:
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     // Oppretter et bufferobjekt:
     let positionBuffer = gl.createBuffer();
