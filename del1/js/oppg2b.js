@@ -13,6 +13,7 @@ let VSHADER_SOURCE = `
 
 let FSHADER_SOURCE = `
     precision mediump float;
+    uniform vec4 u_FragColor; 
     varying vec4 v_Color;
     void main() {
         gl_FragColor = v_Color;
@@ -29,8 +30,8 @@ function main(){
     }
 
     // Fungerer ikke på mobil (IOS/IPADOS)?
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // gl.enable(gl.BLEND);
+    // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     if(!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)){
         console.log("Klarte ikke å initialisere shaders");
