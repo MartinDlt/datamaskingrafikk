@@ -56,13 +56,13 @@ function main(){
         return;
     }
     let verticesPerTri = 3;
-    gl.drawArrays(gl.TRIANGLES, 0, numAxes * verticesPerTri);
+    gl.drawArrays(gl.TRIANGLES, 0, numTris * verticesPerTri);
 
     numTris = createBigArrow(gl);
     if(numTris <= 0){
         return;
     }
-    gl.drawArrays(gl.TRIANGLES, 0, numAxes * verticesPerTri);
+    gl.drawArrays(gl.TRIANGLES, 0, numTris * verticesPerTri);
 
 }
 
@@ -196,5 +196,5 @@ function addVerticesToBuffer(vertices, colors, gl, shape){
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     // Divide the total length of the vertices with the amount of vertices in the shape
-    return vertices.length / shape;
+    return vertices.length / (3 * shape);
 }

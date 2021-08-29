@@ -1,4 +1,4 @@
-// Globale variabler:
+'use strict';
 
 // Vertex shader program
 let  VSHADER_SOURCE =
@@ -17,81 +17,103 @@ let  FSHADER_SOURCE =
   '  gl_FragColor = u_FragColor;\n' + // Fargeverdi.
   '}\n';
 
-let  gl = null;
-let  canvas = null;
-
-// Verteksbuffer:
-let  vertexBuffer = null;
-
+// Andre globale variabler:
+let gl = null;
+let canvas = null;
+let positionBuffer = null;
 // "Pekere" som brukes til å sende matrisene til shaderen:
-let  u_modelviewMatrix = null;
-let  u_projectionMatrix = null;
-
+let u_modelviewMatrix = null;
+let u_projectionMatrix = null;
 // Matrisene:
-let  modelMatrix = null;
-let  viewMatrix = null;
-let  modelviewMatrix = null; //sammenslått modell- og viewmatrise.
-let  projectionMatrix = null;
+let modelMatrix = null;
+let viewMatrix = null;
+let modelviewMatrix = null; //sammenslått modell- og viewmatrise.
+let projectionMatrix = null;
 
+function main() {
+	init();
+
+	// Initialiser shadere (cuon-utils):
+	if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+		console.log('Feil ved initialisering av shaderkoden.');
+		return;
+	}
+
+	// Initialiserer verteksbuffer:
+	initBuffers();
+
+	// Binder shaderparametre:
+	if (!initUniforms())
+		return;
+
+	draw();
+}
+
+/**
+ * Initialisering og oppstart.
+ */
 function init() {
 	// Hent <canvas> elementet
 	canvas = document.getElementById('webgl');
 
 	// Rendering context for WebGL:
 	gl = canvas.getContext('webgl');
-	if (!gl) {
+	if (!gl)
 		console.log('Fikk ikke tak i rendering context for WebGL');
-		return false;
-	}
 
 	modelMatrix = new Matrix4();
 	viewMatrix = new Matrix4();
 	modelviewMatrix = new Matrix4();
 	projectionMatrix = new Matrix4();
 
-	return true;
+	// Setter bakgrunnsfarge:
+	gl.clearColor(0.3, 0.0, 0.4, 1.0); //RGBA
 }
 
-function initBuffer() {
+/**
+ * Oppretter og fyller posisjonsbuffer.
+ *
+ */
+function initBuffers() {
 	// 3 stk 3D vertekser:
-	let triangleVertices = new Float32Array([   //NB! ClockWise!!
+	let trianglePositions = new Float32Array([   //NB! ClockWise!!
        -10, -10, 0,
        0, 10, 0,
        10, -10, 0
     ]);
 
 	// Verteksbuffer:
-	vertexBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW);
+	positionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, trianglePositions, gl.STATIC_DRAW);
 
-	vertexBuffer.itemSize = 3; // NB!!
-	vertexBuffer.numberOfItems = 3; // NB!!
+	positionBuffer.itemSize = 3; // NB!!
+	positionBuffer.numberOfItems = 3; // NB!!
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-function bindShaderParameters() {
-	// Kopler shaderparametre med Javascript-variabler:
-
+/**
+ * Kopler ev. uniformvariabler.
+ * @returns {boolean}
+ */
+function initUniforms() {
 	// Farge: u_FragColor (bruker samme farge på alle piksler/fragmenter):
-	let  u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+	let u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
 	if (u_FragColor < 0) {
 		console.log('Fant ikke uniform-parametret u_FragColor i shaderen!?');
 		return false;
 	}
-	let  rgba = [ 0.3, 0.5, 0.0, 1.0 ];
+	let rgba = [ 0.3, 0.5, 0.0, 1.0 ];
 	gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
 	// Matriser: u_modelviewMatrix & u_projectionMatrix
 	u_modelviewMatrix = gl.getUniformLocation(gl.program, 'u_modelviewMatrix');
 	u_projectionMatrix = gl.getUniformLocation(gl.program, 'u_projectionMatrix');
-
 	return true;
 }
 
 function draw() {
-
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
     // BackfaceCulling:
@@ -101,10 +123,12 @@ function draw() {
 	gl.cullFace(gl.BACK);		//culler baksider.
     */
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	// Posisjon: a_Position
-	let  a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+	// Binder først til aktuelt buffer:
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+	// Kopler til shaderattributter:
+	let a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+	gl.vertexAttribPointer(a_Position, positionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(a_Position);
 
 	// Definerer modellmatrisa:
@@ -124,43 +148,18 @@ function draw() {
 	// Sender matriser til shader:
 	gl.uniformMatrix4fv(u_modelviewMatrix, false, modelviewMatrix.elements);
 	gl.uniformMatrix4fv(u_projectionMatrix, false, projectionMatrix.elements);
-	gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numberOfItems);
+	gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.numberOfItems);
 
     //Tegner samme trekant på nytt, men med annen transformasjon:
 	modelMatrix.setTranslate(-10, -5, 0);
     modelviewMatrix = viewMatrix.multiply(modelMatrix); // NB! rekkefølge!
 	gl.uniformMatrix4fv(u_modelviewMatrix, false, modelviewMatrix.elements);
-	gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numberOfItems);
+	gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.numberOfItems);
 
     //... og på nytt:
 	modelMatrix.setTranslate(-13, -13, 4);
 	modelMatrix.rotate(33, 0, 0, 1);
 	modelviewMatrix = viewMatrix.multiply(modelMatrix); // NB! rekkefølge!
 	gl.uniformMatrix4fv(u_modelviewMatrix, false, modelviewMatrix.elements);
-	gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numberOfItems);
-}
-
-function main() {
-
-	if (!init())
-		return;
-
-	// Initialiser shadere (cuon-utils):
-	if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-		console.log('Feil ved initialisering av shaderkoden.');
-		return;
-	}
-
-	// Initialiserer verteksbuffer:
-	initBuffer();
-
-	// Binder shaderparametre:
-	if (!bindShaderParameters())
-		return;
-
-	// Setter bakgrunnsfarge:
-	gl.clearColor(0.3, 0.0, 0.4, 1.0); //RGBA
-
-	// Tegn!
-	draw();
+	gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.numberOfItems);
 }

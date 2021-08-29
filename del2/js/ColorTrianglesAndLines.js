@@ -2,7 +2,7 @@
 
 /**
  * Bruker ET buffer til både posisjon og farge:
- *
+ * Tegner trenkanter og linjer.
  */
 
 // Verteksshader:
@@ -25,7 +25,8 @@ let FSHADER_SOURCE =
 
 // Andre globale variabler:
 let gl;
-let vertexBuffer;
+let vertexBufferTriangle;
+let vertexBufferLine;
 
 function main() {
 	init();
@@ -38,7 +39,8 @@ function main() {
 	if (!initUniforms())
 		return;
 	//Initialiserer verteksbuffer:
-	initBuffers(gl);
+	initBuffersTriangle(gl);
+	initBuffersLine();
 	draw();
 }
 
@@ -56,7 +58,7 @@ function init() {
 	gl.clearColor(0.8, 0.8, 0.8, 1.0); //RGBA
 }
 
-function initBuffers() {
+function initBuffersTriangle() {
 	//3 stk 3D vertekser bestående av posisjon og farge:
 	let vertices = new Float32Array([
 		0.0, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 		//x,y,z, RgbA
@@ -65,12 +67,31 @@ function initBuffers() {
 	]);
 
 	//Oppretter verteksbuffer: binder og skriver data til bufret:
-	vertexBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	vertexBufferTriangle = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferTriangle);
 	gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 	//Setter antall floats per verteks og antall vertekser i dette bufret:
-	vertexBuffer.itemSize = 7; // NB!!
-	vertexBuffer.numberOfItems = vertices.length / 7; // NB!!
+	vertexBufferTriangle.itemSize = 7; // NB!!
+	vertexBufferTriangle.numberOfItems = vertices.length / 7; // NB!!
+
+	//Kopler fra bufret:
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+function initBuffersLine() {
+	//2 stk 3D vertekser bestående av posisjon og farge:
+	let vertices = new Float32Array([
+		-1.0, -1.0, 0.0,    1.0, 0.0, 0.0, 1.0, 	//x,y,z, RgbA
+		1.0, 1.0, 0.0,      1.0, 0.0, 0.0, 1.0,	    //x,y,z, rGbA
+	]);
+
+	//Oppretter verteksbuffer: binder og skriver data til bufret:
+	vertexBufferLine = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferLine);
+	gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+	//Setter antall floats per verteks og antall vertekser i dette bufret:
+	vertexBufferLine.itemSize = 7; // NB!!
+	vertexBufferLine.numberOfItems = vertices.length / 7; // NB!!
 
 	//Kopler fra bufret:
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -92,8 +113,13 @@ function draw() {
 	gl.enable(gl.CULL_FACE);	//enabler culling.
 	gl.cullFace(gl.BACK);		//culler baksider.
 
+	drawTriangles();
+	drawLines();
+}
+
+function drawTriangles() {
 	// Kopler til shaderparametre, må først binde til aktuelt buffer:
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferTriangle);
 	// Kopler posisjonsparametret til bufferobjektet: 3=antall floats per verteks.
 	let a_Position = gl.getAttribLocation(gl.program, 'a_Position');
 	let stride = (3 + 4) * 4;  // Dvs. antall bytes som hver verteks opptar (pos+color). 4 byte per float.
@@ -106,6 +132,26 @@ function draw() {
 	gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, stride, colorOfset);
 	gl.enableVertexAttribArray(a_Color);
 
-	// Tegner en trekant:
-	gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numberOfItems);
+	// Tegner en trekanten:
+	gl.drawArrays(gl.TRIANGLES, 0, vertexBufferTriangle.numberOfItems);
 }
+
+function drawLines() {
+	// Kopler til shaderparametre, må først binde til aktuelt buffer:
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferLine);
+	// Kopler posisjonsparametret til bufferobjektet: 3=antall floats per verteks.
+	let a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+	let stride = (3 + 4) * 4;  // Dvs. antall bytes som hver verteks opptar (pos+color). 4 byte per float.
+	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, stride, 0);
+	gl.enableVertexAttribArray(a_Position);
+
+	// Kople fargeparametret til bufferobjektet: 4=ant. Floats per verteks
+	let a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+	let colorOfset = 3 * 4; //12= offset, start på color-info innafor verteksinfoen.
+	gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, stride, colorOfset);
+	gl.enableVertexAttribArray(a_Color);
+
+	// Tegner en trekanten:
+	gl.drawArrays(gl.LINES, 0, vertexBufferLine.numberOfItems);
+}
+
