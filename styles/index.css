@@ -90,5 +90,12 @@ a:visited{
      background: #c6fcfc;
  }
 
+#del3 ul li a {
+    background: salmon;
+}
+
+#del3 ul li a:hover {
+    background: #ffa69c;
+}
 
 
