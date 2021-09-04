@@ -38,9 +38,15 @@ let animationAngle = 0;
 let armWaveAngle = 15 * Math.sin(animationAngle) - 9;
 let activeKeys = [];
 let showWireframe = false;
-
+let lastTime = Date.now();
+let deltaTime = 0;
+let TARGET_FRAMERATE = 60;
+let fpsDisplay;
+let frameCount = 59;
 
 function main() {
+    fpsDisplay = document.getElementById("fpsDisplay");
+
     init();
 
     // Initialiser shadere (cuon-utils):
@@ -108,27 +114,27 @@ function handleActiveKeys(){
 
     // ---->
     if(activeKeys.includes(39)){
-        camViewAngle = (camViewAngle - 0.06) % 360;
+        camViewAngle = camViewAngle - (0.06 * deltaTime * TARGET_FRAMERATE) % 360;
     }
 
     // <----
     if(activeKeys.includes(37)){
-        camViewAngle = (camViewAngle + 0.06) % 360;
+        camViewAngle = camViewAngle + (0.06 * deltaTime * TARGET_FRAMERATE) % 360;
     }
 
     // ,
     if(activeKeys.includes(188)){
-        camScale += 0.5;
+        camScale += 0.5 * deltaTime * TARGET_FRAMERATE;
     }
 
     // .
     if(activeKeys.includes(190)){
-        camScale -= 0.5;
+        camScale -= 0.5 * deltaTime * TARGET_FRAMERATE;
     }
 
     // F
     if(activeKeys.includes(70)){
-        animationAngle = (animationAngle + 0.07) % 360;
+        animationAngle = animationAngle + (0.07 * deltaTime * TARGET_FRAMERATE) % 360;
         armWaveAngle =  15 * Math.sin(animationAngle) - 9;
     }
 
@@ -178,7 +184,16 @@ function initUniforms() {
 }
 
 function draw() {
+    frameCount++;
+
     gl.clear(gl.COLOR_BUFFER_BIT);
+    let now = Date.now();
+    deltaTime = (now - lastTime) / 1000;
+    if(frameCount % 60 === 0){
+        fpsDisplay.innerHTML = (1 / deltaTime).toFixed(2);
+        frameCount = 0;
+    }
+    lastTime = now;
     //camViewAngle = (camViewAngle + 0.01) % 360;
     rotateCameraXZ(camViewAngle);
     requestAnimationFrame(draw);
