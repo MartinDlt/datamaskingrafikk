@@ -10,28 +10,28 @@
     </h1>
     <ul>
         <li>
-            <a href="del1/HelloCanvas.html">HelloCanvas</a>
+            <a href="del1WebGL/HelloCanvas.html">HelloCanvas</a>
         </li>
         <li>
-            <a href="del1/HelloPoint1.html">HelloPoint1</a>
+            <a href="del1WebGL/HelloPoint1.html">HelloPoint1</a>
         </li>
         <li>
-            <a href="del1/HelloPoint2.html">HelloPoint2</a>
+            <a href="del1WebGL/HelloPoint2.html">HelloPoint2</a>
         </li>
         <li>
-            <a href="del1/HelloTriangle.html">HelloTriangle</a>
+            <a href="del1WebGL/HelloTriangle.html">HelloTriangle</a>
         </li>
         <li>
-            <a href="del1/ColorPoint1.html">ColorPoint1</a>
+            <a href="del1WebGL/ColorPoint1.html">ColorPoint1</a>
         </li>
         <li>
-            <a href="del1/MultiPoint.html">MultiPoint</a>
+            <a href="del1WebGL/MultiPoint.html">MultiPoint</a>
         </li>
         <li>
-            <a href="del1/TegnRektangel.html">TegnRektangel</a>
+            <a href="del1WebGL/TegnRektangel.html">TegnRektangel</a>
         </li>
         <li>
-            <a href="del1/oppg2a.html">Oppgave 2A</a>        
+            <a href="del1WebGL/oppg2a.html">Oppgave 2A</a>        
         </li>
     </ul>
 </body>

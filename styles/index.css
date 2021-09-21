@@ -6,10 +6,12 @@
 }
 
 html {
-    overflow: hidden;
+    overflow: paged-x;
+    width: 100vw;
 }
 
 body{
+
     width: 100vw;
     height: 100vh;
     margin: auto;
@@ -75,27 +77,51 @@ a:visited{
     color: black;
 }
 
-#del1 ul li a {
+#webGL1 ul li a {
     background: palegreen;
 }
-#del1 ul li a:hover {
+#webGL1 ul li a:hover {
     background: #c3ffc3;
 }
 
-#del2 ul li a {
+#webGL2 ul li a {
     background: paleturquoise;
 }
 
-#del2 ul li a:hover {
+#webGL2 ul li a:hover {
      background: #c6fcfc;
  }
 
-#del3 ul li a {
+#webGL3 ul li a {
     background: salmon;
 }
 
-#del3 ul li a:hover {
+#webGL3 ul li a:hover {
     background: #ffa69c;
+}
+
+#three0 ul li a {
+    background: orange;
+}
+
+#three0 ul li a:hover {
+    background: #ffb867;
+}
+
+#three1 ul li a {
+    background: mediumpurple;
+}
+
+#three1 ul li a:hover {
+    background: #c7b1fa;
+}
+
+#three2 ul li a {
+    background: gold;
+}
+
+#three2 ul li a:hover {
+    background: #ffe686;
 }
 
 
